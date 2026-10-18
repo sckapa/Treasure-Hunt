@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.InputSystem.iOS;
 
 public class MazeGenerator : MonoBehaviour
 {
@@ -17,6 +15,13 @@ public class MazeGenerator : MonoBehaviour
     private MazeCell[,] maze;
 
     private Vector2Int currentCell;
+
+    private MazeRenderer mazeRenderer;
+
+    private void Start()
+    {
+        mazeRenderer = FindFirstObjectByType<MazeRenderer>();
+    }
 
     public MazeCell[,] GetMaze()
     {
@@ -166,6 +171,12 @@ public class MazeGenerator : MonoBehaviour
                 path.Add(currentCell);
             }
         }
+    }
+
+    public Vector2 GetRandomCellInMaze()
+    {
+        var pos = new Vector2((float)UnityEngine.Random.Range(0, mazeHeight - 1) * mazeRenderer.cellSize, (float)UnityEngine.Random.Range(0, mazeWidth - 1) * mazeRenderer.cellSize);
+        return pos;
     }
 }
 

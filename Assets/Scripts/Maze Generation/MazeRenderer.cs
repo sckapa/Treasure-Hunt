@@ -2,12 +2,12 @@ using UnityEngine;
 
 public class MazeRenderer : MonoBehaviour
 {
+    public float cellSize = 5f;
+
     [SerializeField]
     private MazeGenerator mazeGenerator;
     [SerializeField]
     private GameObject mazeCellPrefab;
-    [SerializeField]
-    private float cellSize = 5f;
 
     public void GenerateMaze()
     {

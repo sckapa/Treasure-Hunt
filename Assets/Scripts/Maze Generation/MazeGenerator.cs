@@ -18,7 +18,7 @@ public class MazeGenerator : MonoBehaviour
 
     private MazeRenderer mazeRenderer;
 
-    private void Start()
+    private void Awake()
     {
         mazeRenderer = FindFirstObjectByType<MazeRenderer>();
     }

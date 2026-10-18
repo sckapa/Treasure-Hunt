@@ -3,7 +3,8 @@ using UnityEngine.AI;
 
 public class EnemyPatrol : MonoBehaviour
 {
-    private Transform target;
+    [HideInInspector]
+    public Transform target;
 
     private NavMeshAgent navMeshAgent;
     private MazeGenerator mazeGenerator;
@@ -11,6 +12,7 @@ public class EnemyPatrol : MonoBehaviour
     private void Start()
     {
         target = new GameObject(transform.name + "Navmesh Destination Point").transform;
+        transform.parent = GameManager.instance.enemyParent;
         mazeGenerator = FindFirstObjectByType<MazeGenerator>();
         navMeshAgent = GetComponent<NavMeshAgent>();
     }

@@ -9,7 +9,7 @@ public class MazeRenderer : MonoBehaviour
     [SerializeField]
     private float cellSize = 5f;
 
-    private void Start()
+    public void GenerateMaze()
     {
         var maze = mazeGenerator.GetMaze();
 
@@ -17,7 +17,7 @@ public class MazeRenderer : MonoBehaviour
         {
             for (int y = 0; y < mazeGenerator.mazeHeight; y++)
             {
-                GameObject newCell = Instantiate(mazeCellPrefab, new Vector3(x * cellSize, 0, y * cellSize), Quaternion.identity, transform);
+                GameObject newCell = Instantiate(mazeCellPrefab, new Vector3((float)x * cellSize, 0f, (float)y * cellSize), Quaternion.identity, transform);
 
                 MazeCellObject mazeCell = newCell.GetComponent<MazeCellObject>();
 
@@ -39,6 +39,14 @@ public class MazeRenderer : MonoBehaviour
 
                 mazeCell.Init(top, bottom, left, right);
             }
+        }
+    }
+
+    public void ClearMaze()
+    {
+        for (int i = transform.childCount - 1; i >= 0; i--)
+        {
+            DestroyImmediate(transform.GetChild(i).gameObject);
         }
     }
 }

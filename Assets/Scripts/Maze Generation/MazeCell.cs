@@ -21,6 +21,8 @@ public class MazeCell
         this.x = x;
         this.y = y;
 
+        // We only need 2 flags because left wall of some cell will be its neighbor's right wall
+        // and top wall of some cell will be its neighbor's bottom wall
         topWall = true;
         leftWall = true;
     }

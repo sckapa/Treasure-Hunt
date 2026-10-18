@@ -6,6 +6,8 @@ public class MazeRenderer : MonoBehaviour
     private MazeGenerator mazeGenerator;
     [SerializeField]
     private GameObject mazeCellPrefab;
+    [SerializeField]
+    private float cellSize = 5f;
 
     private void Start()
     {
@@ -15,7 +17,7 @@ public class MazeRenderer : MonoBehaviour
         {
             for (int y = 0; y < mazeGenerator.mazeHeight; y++)
             {
-                GameObject newCell = Instantiate(mazeCellPrefab, new Vector3(x, 0, y), Quaternion.identity, transform);
+                GameObject newCell = Instantiate(mazeCellPrefab, new Vector3(x * cellSize, 0, y * cellSize), Quaternion.identity, transform);
 
                 MazeCellObject mazeCell = newCell.GetComponent<MazeCellObject>();
 

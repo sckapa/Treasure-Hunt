@@ -6,17 +6,31 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
-    public ThirdPersonController thirdPersonController;
+    [Header("Player")]
+    public ThirdPersonController playerThirdPersonController;
+    public Animator playerAnimator;
+
+    [SerializeField]
+    private PlayerStats playerStats;
+    [SerializeField]
+    private GameObject player;
 
     [HideInInspector]
     public List<GameObject> enemies;
+    
+    [HideInInspector]
+    public List<GameObject> mudTraps;
 
+    [Header("Enemies")]
     [SerializeField]
     private int enemyCount;
     [SerializeField]
     private GameObject enemyPrefab;
     public Transform enemyParent;
-    
+    [SerializeField]
+    private int enemySpawnDistance;
+
+    [Header("Traps")]
     [SerializeField]
     private int landmineCount;
     [SerializeField]
@@ -35,7 +49,14 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private Transform trapParent;
 
+    [SerializeField]
+    private int trapSpawnDistance;
+
+    [Header("Scripts")]
+    [SerializeField]
     private MazeGenerator mazeGenerator;
+    [SerializeField]
+    private MazeRenderer mazeRenderer;
 
     private void Awake()
     {
@@ -47,38 +68,54 @@ public class GameManager : MonoBehaviour
         {
             instance = this;
         }
-
-        mazeGenerator = FindFirstObjectByType<MazeGenerator>();
     }
 
     private void Start()
     {
+        Vector2Int playerPos = mazeGenerator.GetRandomCellInMaze();
+        Vector3 playerSpawnPos = new Vector3(playerPos.x * mazeRenderer.cellSize, 0.5f, playerPos.y * mazeRenderer.cellSize);
+        player.transform.position = playerSpawnPos;
+
+        // Spawn escape route
+
         for (int i = 0; i < enemyCount; i++)
         {
-            Vector2 pos = mazeGenerator.GetRandomCellInMaze();
+            Vector2 pos = mazeGenerator.GetRandomCellPosInMaze(playerPos, enemySpawnDistance);
             Vector3 spawnPos = new Vector3(pos.x, 0, pos.y);
             enemies.Add(Instantiate(enemyPrefab, spawnPos, Quaternion.identity, enemyParent));
         }
 
         for (int i = 0; i < landmineCount; i++)
         {
-            Vector2 pos = mazeGenerator.GetRandomCellInMaze();
+            Vector2 pos = mazeGenerator.GetRandomCellPosInMaze(playerPos, trapSpawnDistance);
             Vector3 spawnPos = new Vector3(pos.x, 0.15f, pos.y);
             Instantiate(landminePrefab, spawnPos, Quaternion.identity, trapParent);
         }
 
         for (int i = 0; i < fogTrapCount; i++)
         {
-            Vector2 pos = mazeGenerator.GetRandomCellInMaze();
+            Vector2 pos = mazeGenerator.GetRandomCellPosInMaze(playerPos, trapSpawnDistance);
             Vector3 spawnPos = new Vector3(pos.x, 2.5f, pos.y);
             Instantiate(fogTrapPrefab, spawnPos, Quaternion.identity, trapParent);
         }
 
         for (int i = 0; i < mudTrapCount; i++)
         {
-            Vector2 pos = mazeGenerator.GetRandomCellInMaze();
+            Vector2 pos = mazeGenerator.GetRandomCellPosInMaze(playerPos, trapSpawnDistance);
             Vector3 spawnPos = new Vector3(pos.x, 0, pos.y);
-            Instantiate(mudTrapPrefab, spawnPos, Quaternion.identity, trapParent);
+            mudTraps.Add(Instantiate(mudTrapPrefab, spawnPos, Quaternion.identity, trapParent));
         }
+    }
+
+    public void DealDamage(float damage)
+    {
+        playerStats.DealDamage(damage);
+    }
+
+    public void GameOver()
+    {
+        playerThirdPersonController.enabled = false;
+        playerAnimator.SetFloat("Speed", 0f);
+        Cursor.lockState = CursorLockMode.None;
     }
 }

@@ -1,16 +1,19 @@
+using System.Collections;
 using UnityEngine;
 
 public class MudTrap : MonoBehaviour
 {
     [SerializeField]
     private float moveSpeedSlowFactor = 2f;
+    [SerializeField]
+    private float timeBeforeSpeedReset = 1.5f;
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Player")
+        if (other.gameObject.CompareTag("Player"))
         {
-            GameManager.instance.thirdPersonController.MoveSpeed /= moveSpeedSlowFactor;
-            GameManager.instance.thirdPersonController.SprintSpeed /= moveSpeedSlowFactor;
+            GameManager.instance.playerThirdPersonController.MoveSpeed /= moveSpeedSlowFactor;
+            GameManager.instance.playerThirdPersonController.SprintSpeed /= moveSpeedSlowFactor;
         }
     }
 
@@ -18,8 +21,15 @@ public class MudTrap : MonoBehaviour
     {
         if (other.gameObject.tag == "Player")
         {
-            GameManager.instance.thirdPersonController.MoveSpeed *= moveSpeedSlowFactor;
-            GameManager.instance.thirdPersonController.SprintSpeed *= moveSpeedSlowFactor;
+            StartCoroutine(ResetMovementSpeed());
         }
+    }
+
+    private IEnumerator ResetMovementSpeed()
+    {
+        yield return new WaitForSeconds(timeBeforeSpeedReset);
+
+        GameManager.instance.playerThirdPersonController.MoveSpeed *= moveSpeedSlowFactor;
+        GameManager.instance.playerThirdPersonController.SprintSpeed *= moveSpeedSlowFactor;
     }
 }

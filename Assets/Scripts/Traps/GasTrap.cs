@@ -4,6 +4,8 @@ public class GasTrap : MonoBehaviour
 {
     [SerializeField]
     private float tickDuration = 1f;
+    [SerializeField]
+    private float damagePerTick = 5.5f;
 
     private float tick;
 
@@ -14,13 +16,17 @@ public class GasTrap : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        tick -= Time.deltaTime;
-
-        if (tick <= 0)
+        if (other.gameObject.tag == "Player")
         {
-            // Damage player
+            tick -= Time.deltaTime;
 
-            tick = tickDuration;
+            if (tick <= 0)
+            {
+                // Damage player
+                GameManager.instance.DealDamage(damagePerTick);
+
+                tick = tickDuration;
+            }
         }
     }
 }

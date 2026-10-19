@@ -20,7 +20,7 @@ public class MazeGenerator : MonoBehaviour
 
     private void Awake()
     {
-        mazeRenderer = FindFirstObjectByType<MazeRenderer>();
+        mazeRenderer = GetComponent<MazeRenderer>();
     }
 
     public MazeCell[,] GetMaze()
@@ -40,7 +40,7 @@ public class MazeGenerator : MonoBehaviour
         return maze;
     }
 
-    private List<Directions> GetRandomDirection()
+    private List<Directions> GetRandomDirections()
     {
         List<Directions> directions = new List<Directions> { Directions.Left, Directions.Right, Directions.Up, Directions.Down };
 
@@ -68,7 +68,7 @@ public class MazeGenerator : MonoBehaviour
 
     private Vector2Int CheckNeighbours()
     {
-        List<Directions> randomDirections = GetRandomDirection();
+        List<Directions> randomDirections = GetRandomDirections();
 
         for (int i = 0; i < randomDirections.Count; i++)
         {
@@ -173,10 +173,54 @@ public class MazeGenerator : MonoBehaviour
         }
     }
 
-    public Vector2 GetRandomCellInMaze()
+    public Vector2 GetRandomCellPosInMaze()
     {
         var pos = new Vector2((float)UnityEngine.Random.Range(0, mazeHeight - 1) * mazeRenderer.cellSize, (float)UnityEngine.Random.Range(0, mazeWidth - 1) * mazeRenderer.cellSize);
         return pos;
+    }
+
+    public Vector2Int GetRandomCellInMaze()
+    {
+        var cell = new Vector2Int(UnityEngine.Random.Range(0, mazeHeight - 1), UnityEngine.Random.Range(0, mazeWidth - 1));
+        return cell;
+    }
+
+    // Gets a random cell outside circle
+    public Vector2 GetRandomCellPosInMaze(Vector2Int center, int radius)
+    {
+        List<Directions> randomDirections = GetRandomDirections();
+        int x = -1;
+        int y = -1;
+
+        for (int i = 0; i < randomDirections.Count; i++)
+        {
+            if (x == -1 && randomDirections[i] == Directions.Right && center.x + radius < mazeWidth)
+            {
+                x = UnityEngine.Random.Range(center.x + radius, mazeWidth - 1);
+            }
+            else if (x == -1 && randomDirections[i] == Directions.Left && center.x - radius >= 0)
+            {
+                x = UnityEngine.Random.Range(0, center.x - radius);
+            }
+
+            if (y == -1 && randomDirections[i] == Directions.Up && center.y + radius < mazeHeight)
+            {
+                y = UnityEngine.Random.Range(center.y + radius, mazeHeight - 1);
+            }
+            else if (y == -1 && randomDirections[i] == Directions.Down && center.y - radius >= 0)
+            {
+                y = UnityEngine.Random.Range(0, center.y - radius);
+            }
+
+            if (x != -1 && y != -1)
+            {
+                Vector2 pos = new Vector2(x * mazeRenderer.cellSize, y * mazeRenderer.cellSize);
+                return pos;
+            }
+        }
+
+        Debug.LogWarning("Couldn't find valid cell in given constraints. Returning random cell instead.");
+        return GetRandomCellPosInMaze();
     }
 }
 

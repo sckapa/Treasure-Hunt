@@ -6,8 +6,7 @@ public class LandmineTrap : MonoBehaviour
     {
         if (other.gameObject.tag == "Player")
         {
-            // Game over
-            Debug.Log("Game Over");
+            GameManager.instance.GameOver();
         }
     }
 }

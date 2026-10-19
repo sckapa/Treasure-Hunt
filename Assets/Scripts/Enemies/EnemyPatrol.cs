@@ -11,7 +11,7 @@ public class EnemyPatrol : MonoBehaviour
 
     private void Start()
     {
-        target = new GameObject(transform.name + "Navmesh Destination Point").transform;
+        target = new GameObject(transform.name + "NavMesh Destination Point").transform;
         transform.parent = GameManager.instance.enemyParent;
         mazeGenerator = FindFirstObjectByType<MazeGenerator>();
         navMeshAgent = GetComponent<NavMeshAgent>();
@@ -23,7 +23,7 @@ public class EnemyPatrol : MonoBehaviour
         if (navMeshAgent.remainingDistance == 0)
         {
             // Get new destination
-            var pos = mazeGenerator.GetRandomCellInMaze();
+            var pos = mazeGenerator.GetRandomCellPosInMaze();
             target.position = new Vector3(pos.x, 0, pos.y);
 
             // Start travelling

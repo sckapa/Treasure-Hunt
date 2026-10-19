@@ -66,6 +66,7 @@ public class EnemyFOV : MonoBehaviour
                 if (hit.collider.tag == "Player")
                 {
                     // Game over
+                    GameManager.instance.GameOver();
                 }
 
                 distance = hit.distance;

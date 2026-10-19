@@ -13,7 +13,7 @@ public class EnemyPatrol : MonoBehaviour
     {
         target = new GameObject(transform.name + "NavMesh Destination Point").transform;
         transform.parent = GameManager.instance.enemyParent;
-        mazeGenerator = FindFirstObjectByType<MazeGenerator>();
+        mazeGenerator = GameManager.instance.mazeGenerator;
         navMeshAgent = GetComponent<NavMeshAgent>();
     }
 

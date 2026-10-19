@@ -2,14 +2,10 @@ using UnityEngine;
 
 public class MazeCellObject : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject topWall;
-    [SerializeField]
-    private GameObject bottomWall;
-    [SerializeField]
-    private GameObject leftWall;
-    [SerializeField]
-    private GameObject rightWall;
+    public GameObject topWall;
+    public GameObject bottomWall;
+    public GameObject leftWall;
+    public GameObject rightWall;
 
     public void Init(bool top, bool bottom, bool left, bool right)
     {

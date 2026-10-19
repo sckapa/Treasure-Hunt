@@ -17,10 +17,26 @@ public class GameManager : MonoBehaviour
 
     [HideInInspector]
     public List<GameObject> enemies;
-    
+
     [HideInInspector]
     public List<GameObject> mudTraps;
 
+    [Header("Elevator")]
+    [SerializeField]
+    private GameObject elevatorPrefab;
+    [SerializeField]
+    private int elevatorSpawnDistance;
+    
+    [Header("Healing Items")]
+    [SerializeField]
+    private int healingItemCount;
+    [SerializeField]
+    private GameObject healingItemPrefab;
+    [SerializeField]
+    private Transform healingItemsParent;
+    [SerializeField]
+    private int healingItemsSpawnDistance;
+    
     [Header("Enemies")]
     [SerializeField]
     private int enemyCount;
@@ -34,15 +50,14 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private int landmineCount;
     [SerializeField]
-    private GameObject landminePrefab;
-    
-    [SerializeField]
     private int fogTrapCount;
     [SerializeField]
-    private GameObject fogTrapPrefab;
-    
-    [SerializeField]
     private int mudTrapCount;
+
+    [SerializeField]
+    private GameObject landminePrefab;
+    [SerializeField]
+    private GameObject fogTrapPrefab;
     [SerializeField]
     private GameObject mudTrapPrefab;
 
@@ -52,15 +67,12 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private int trapSpawnDistance;
 
-    [Header("Scripts")]
-    [SerializeField]
-    private MazeGenerator mazeGenerator;
-    [SerializeField]
-    private MazeRenderer mazeRenderer;
+    [Header("Maze Data")]
+    public MazeGenerator mazeGenerator;
 
     private void Awake()
     {
-        if(instance != null)
+        if (instance != null)
         {
             Destroy(this);
         }
@@ -72,19 +84,35 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        // Spawn player
         Vector2Int playerPos = mazeGenerator.GetRandomCellInMaze();
-        Vector3 playerSpawnPos = new Vector3(playerPos.x * mazeRenderer.cellSize, 0.5f, playerPos.y * mazeRenderer.cellSize);
+        Vector3 playerSpawnPos = new Vector3(playerPos.x * mazeGenerator.cellSize, 0.5f, playerPos.y * mazeGenerator.cellSize);
         player.transform.position = playerSpawnPos;
 
         // Spawn escape route
+        {
+            Vector2 pos = mazeGenerator.GetRandomCellPosInMaze(playerPos, elevatorSpawnDistance);
+            Vector3 spawnPos = new Vector3(pos.x, 0.15f, pos.y);
+            Instantiate(elevatorPrefab, spawnPos, Quaternion.identity);
+        }
 
+        // Spawn enemies
         for (int i = 0; i < enemyCount; i++)
         {
             Vector2 pos = mazeGenerator.GetRandomCellPosInMaze(playerPos, enemySpawnDistance);
             Vector3 spawnPos = new Vector3(pos.x, 0, pos.y);
             enemies.Add(Instantiate(enemyPrefab, spawnPos, Quaternion.identity, enemyParent));
         }
+        
+        // Spawn healing items
+        for (int i = 0; i < healingItemCount; i++)
+        {
+            Vector2 pos = mazeGenerator.GetRandomCellPosInMaze(playerPos, healingItemsSpawnDistance);
+            Vector3 spawnPos = new Vector3(pos.x, 0, pos.y);
+            Instantiate(healingItemPrefab, spawnPos, Quaternion.identity, healingItemsParent);
+        }
 
+        // Spawn traps
         for (int i = 0; i < landmineCount; i++)
         {
             Vector2 pos = mazeGenerator.GetRandomCellPosInMaze(playerPos, trapSpawnDistance);
@@ -106,10 +134,15 @@ public class GameManager : MonoBehaviour
             mudTraps.Add(Instantiate(mudTrapPrefab, spawnPos, Quaternion.identity, trapParent));
         }
     }
-
+    
     public void DealDamage(float damage)
     {
         playerStats.DealDamage(damage);
+    }
+    
+    public void Heal(float heal)
+    {
+        playerStats.Heal(heal);
     }
 
     public void GameOver()

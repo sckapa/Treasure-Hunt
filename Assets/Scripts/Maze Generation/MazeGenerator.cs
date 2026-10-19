@@ -2,28 +2,78 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MazeGenerator : MonoBehaviour
+[CreateAssetMenu(fileName = "MazeGenerator", menuName = "Scriptable Objects/MazeGenerator")]
+public class MazeGenerator : ScriptableObject
 {
-    [Range(5, 500)]
+    [Range(5, 50)]
     public int mazeWidth = 5;
-    [Range(5, 500)]
+    [Range(5, 50)]
     public int mazeHeight = 5;
+
+    public float cellSize = 5f;
 
     public int startX;  // Position where the algo starts
     public int startY;  // 0,0 = bottom left corner of the maze
+
+    [SerializeField]
+    private GameObject mazeCellPrefab;
+
+    private GameObject mazeParent;
 
     private MazeCell[,] maze;
 
     private Vector2Int currentCell;
 
-    private MazeRenderer mazeRenderer;
-
-    private void Awake()
+    public void GenerateMaze()
     {
-        mazeRenderer = GetComponent<MazeRenderer>();
+        ClearMaze();
+        mazeParent = new GameObject("Maze");
+
+        GetMaze();
+
+        for (int x = 0; x < mazeWidth; x++)
+        {
+            for (int y = 0; y < mazeHeight; y++)
+            {
+                GameObject newCell = Instantiate(mazeCellPrefab, new Vector3((float)x * cellSize, 0f, (float)y * cellSize), Quaternion.identity, mazeParent.transform);
+
+                MazeCellObject mazeCell = newCell.GetComponent<MazeCellObject>();
+
+                bool top = maze[x, y].topWall;
+                bool left = maze[x, y].leftWall;
+
+                bool bottom = false;
+                bool right = false;
+
+                if (x == mazeWidth - 1)
+                {
+                    right = true;
+                }
+
+                if (y == 0)
+                {
+                    bottom = true;
+                }
+
+                mazeCell.Init(top, bottom, left, right);
+            }
+        }
     }
 
-    public MazeCell[,] GetMaze()
+    public void ClearMaze()
+    {
+        if (mazeParent == null)
+        {
+            mazeParent = GameObject.Find("Maze");
+        }
+
+        if (mazeParent != null)
+        {
+            DestroyImmediate(mazeParent);
+        }
+    }
+
+    public void GetMaze()
     {
         maze = new MazeCell[mazeWidth, mazeHeight];
 
@@ -36,8 +86,6 @@ public class MazeGenerator : MonoBehaviour
         }
 
         CarvePath(startX, startY);
-
-        return maze;
     }
 
     private List<Directions> GetRandomDirections()
@@ -175,7 +223,7 @@ public class MazeGenerator : MonoBehaviour
 
     public Vector2 GetRandomCellPosInMaze()
     {
-        var pos = new Vector2((float)UnityEngine.Random.Range(0, mazeHeight - 1) * mazeRenderer.cellSize, (float)UnityEngine.Random.Range(0, mazeWidth - 1) * mazeRenderer.cellSize);
+        var pos = new Vector2((float)UnityEngine.Random.Range(0, mazeHeight - 1) * cellSize, (float)UnityEngine.Random.Range(0, mazeWidth - 1) * cellSize);
         return pos;
     }
 
@@ -185,7 +233,7 @@ public class MazeGenerator : MonoBehaviour
         return cell;
     }
 
-    // Gets a random cell outside circle
+    // Gets a random cell outside radius
     public Vector2 GetRandomCellPosInMaze(Vector2Int center, int radius)
     {
         List<Directions> randomDirections = GetRandomDirections();
@@ -214,7 +262,7 @@ public class MazeGenerator : MonoBehaviour
 
             if (x != -1 && y != -1)
             {
-                Vector2 pos = new Vector2(x * mazeRenderer.cellSize, y * mazeRenderer.cellSize);
+                Vector2 pos = new Vector2(x * cellSize, y * cellSize);
                 return pos;
             }
         }

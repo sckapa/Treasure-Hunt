@@ -35,4 +35,14 @@ public class PlayerStats : MonoBehaviour
             GameManager.instance.GameOver();
         }
     }
+
+    public void Heal(float heal)
+    {
+        health += heal;
+
+        if (health > 100f)
+        {
+            health = 100f;
+        }
+    }
 }

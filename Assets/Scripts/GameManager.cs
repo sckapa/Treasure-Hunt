@@ -1,7 +1,6 @@
 using StarterAssets;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -14,6 +13,8 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private PlayerStats playerStats;
+    [SerializeField]
+    private RagdollController ragdollController;
     [SerializeField]
     private GameObject player;
 
@@ -63,6 +64,9 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private int trapSpawnDistance;
 
+    [Header("Ragdoll")]
+    public GameObject ragdoll;
+    
     [Header("Maze Data")]
     public MazeGenerator mazeGenerator;
 
@@ -144,6 +148,7 @@ public class GameManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
 
         playerStats.OnRestart();
+        ragdollController.OnRespawn();
         playerThirdPersonController.enabled = true;
         playerThirdPersonController.MoveSpeed = 2f;
         playerThirdPersonController.SprintSpeed = 5.335f;
@@ -199,6 +204,8 @@ public class GameManager : MonoBehaviour
         playerThirdPersonController.enabled = false;
         playerAnimator.SetFloat("Speed", 0f);
         Cursor.lockState = CursorLockMode.None;
+
+        ragdollController.OnDeath();
     }
 
     public void GameWon()

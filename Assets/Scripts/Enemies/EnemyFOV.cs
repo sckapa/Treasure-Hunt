@@ -30,10 +30,7 @@ public class EnemyFOV : MonoBehaviour
         mesh = new Mesh();
         meshFilter.mesh = mesh;
 
-        if (fovMaterial != null)
-        {
-            GetComponent<MeshRenderer>().material = fovMaterial;
-        }
+        GetComponent<MeshRenderer>().material = fovMaterial;
     }
 
     void LateUpdate()
@@ -41,6 +38,7 @@ public class EnemyFOV : MonoBehaviour
         GenerateMesh();
     }
 
+    // Create enemy sight
     void GenerateMesh()
     {
         float halfAngle = viewAngle * 0.5f;

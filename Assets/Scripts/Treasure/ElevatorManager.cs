@@ -26,6 +26,7 @@ public class ElevatorManager : MonoBehaviour
 
     private void PlayerNearElevator()
     {
+        GetComponent<AudioSource>().Play();
         animator.SetTrigger("DoorOpen");
     }
 
@@ -41,6 +42,7 @@ public class ElevatorManager : MonoBehaviour
 
     private void PlayerOutsideElevator()
     {
+        GetComponent<AudioSource>().Play();
         animator.SetTrigger("DoorOpen");
     }
 }

@@ -1,5 +1,7 @@
 using StarterAssets;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -14,12 +16,6 @@ public class GameManager : MonoBehaviour
     private PlayerStats playerStats;
     [SerializeField]
     private GameObject player;
-
-    [HideInInspector]
-    public List<GameObject> enemies;
-
-    [HideInInspector]
-    public List<GameObject> mudTraps;
 
     [Header("Elevator")]
     [SerializeField]
@@ -70,6 +66,17 @@ public class GameManager : MonoBehaviour
     [Header("Maze Data")]
     public MazeGenerator mazeGenerator;
 
+    [Header("UI")]
+    [SerializeField]
+    private GameObject gameOverScreen;
+    [SerializeField]
+    private GameObject gameWonScreen;
+
+    private List<GameObject> enemies = new();
+    private List<GameObject> traps = new();
+    private List<GameObject> healingItems = new();
+    private GameObject elevator;
+
     private void Awake()
     {
         if (instance != null)
@@ -82,7 +89,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void Start()
+    private void Init()
     {
         // Spawn player
         Vector2Int playerPos = mazeGenerator.GetRandomCellInMaze();
@@ -93,7 +100,7 @@ public class GameManager : MonoBehaviour
         {
             Vector2 pos = mazeGenerator.GetRandomCellPosInMaze(playerPos, elevatorSpawnDistance);
             Vector3 spawnPos = new Vector3(pos.x, 0.15f, pos.y);
-            Instantiate(elevatorPrefab, spawnPos, Quaternion.identity);
+            elevator = Instantiate(elevatorPrefab, spawnPos, Quaternion.identity);
         }
 
         // Spawn enemies
@@ -109,7 +116,7 @@ public class GameManager : MonoBehaviour
         {
             Vector2 pos = mazeGenerator.GetRandomCellPosInMaze(playerPos, healingItemsSpawnDistance);
             Vector3 spawnPos = new Vector3(pos.x, 0, pos.y);
-            Instantiate(healingItemPrefab, spawnPos, Quaternion.identity, healingItemsParent);
+            healingItems.Add(Instantiate(healingItemPrefab, spawnPos, Quaternion.identity, healingItemsParent));
         }
 
         // Spawn traps
@@ -117,22 +124,62 @@ public class GameManager : MonoBehaviour
         {
             Vector2 pos = mazeGenerator.GetRandomCellPosInMaze(playerPos, trapSpawnDistance);
             Vector3 spawnPos = new Vector3(pos.x, 0.15f, pos.y);
-            Instantiate(landminePrefab, spawnPos, Quaternion.identity, trapParent);
+            traps.Add(Instantiate(landminePrefab, spawnPos, Quaternion.identity, trapParent));
         }
 
         for (int i = 0; i < fogTrapCount; i++)
         {
             Vector2 pos = mazeGenerator.GetRandomCellPosInMaze(playerPos, trapSpawnDistance);
             Vector3 spawnPos = new Vector3(pos.x, 2.5f, pos.y);
-            Instantiate(fogTrapPrefab, spawnPos, Quaternion.identity, trapParent);
+            traps.Add(Instantiate(fogTrapPrefab, spawnPos, Quaternion.identity, trapParent));
         }
 
         for (int i = 0; i < mudTrapCount; i++)
         {
             Vector2 pos = mazeGenerator.GetRandomCellPosInMaze(playerPos, trapSpawnDistance);
             Vector3 spawnPos = new Vector3(pos.x, 0, pos.y);
-            mudTraps.Add(Instantiate(mudTrapPrefab, spawnPos, Quaternion.identity, trapParent));
+            traps.Add(Instantiate(mudTrapPrefab, spawnPos, Quaternion.identity, trapParent));
         }
+
+        Cursor.lockState = CursorLockMode.Locked;
+
+        playerStats.OnRestart();
+        playerThirdPersonController.enabled = true;
+        playerThirdPersonController.MoveSpeed = 2f;
+        playerThirdPersonController.SprintSpeed = 5.335f;
+    }
+
+    public void RestartGame()
+    {
+        foreach (var go in enemies.ToList())
+        {
+            enemies.Remove(go);
+            Destroy(go);
+        }
+
+        foreach (var go in traps.ToList())
+        {
+            traps.Remove(go);
+            Destroy(go);
+        }
+        
+        foreach (var go in healingItems.ToList())
+        {
+            healingItems.Remove(go);
+            Destroy(go);
+        }
+
+        if (elevator != null)
+        {
+            Destroy(elevator);
+        }
+
+        Init();
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
     
     public void DealDamage(float damage)
@@ -147,6 +194,17 @@ public class GameManager : MonoBehaviour
 
     public void GameOver()
     {
+        gameOverScreen.SetActive(true);
+
+        playerThirdPersonController.enabled = false;
+        playerAnimator.SetFloat("Speed", 0f);
+        Cursor.lockState = CursorLockMode.None;
+    }
+
+    public void GameWon()
+    {
+        gameWonScreen.SetActive(true);
+
         playerThirdPersonController.enabled = false;
         playerAnimator.SetFloat("Speed", 0f);
         Cursor.lockState = CursorLockMode.None;

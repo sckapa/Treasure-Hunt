@@ -223,52 +223,45 @@ public class MazeGenerator : ScriptableObject
 
     public Vector2 GetRandomCellPosInMaze()
     {
-        var pos = new Vector2((float)UnityEngine.Random.Range(0, mazeHeight - 1) * cellSize, (float)UnityEngine.Random.Range(0, mazeWidth - 1) * cellSize);
+        var pos = new Vector2((float)UnityEngine.Random.Range(0, mazeWidth) * cellSize, (float)UnityEngine.Random.Range(0, mazeHeight) * cellSize);
         return pos;
     }
 
     public Vector2Int GetRandomCellInMaze()
     {
-        var cell = new Vector2Int(UnityEngine.Random.Range(0, mazeHeight - 1), UnityEngine.Random.Range(0, mazeWidth - 1));
+        var cell = new Vector2Int(UnityEngine.Random.Range(0, mazeWidth), UnityEngine.Random.Range(0, mazeHeight));
         return cell;
     }
 
     // Gets a random cell outside radius
     public Vector2 GetRandomCellPosInMaze(Vector2Int center, int radius)
     {
-        List<Directions> randomDirections = GetRandomDirections();
-        int x = -1;
-        int y = -1;
+        List<Vector2Int> validCells = new();
 
-        for (int i = 0; i < randomDirections.Count; i++)
+        for (int x = 0; x < mazeWidth; x++)
         {
-            if (x == -1 && randomDirections[i] == Directions.Right && center.x + radius < mazeWidth)
+            for (int y = 0; y < mazeHeight; y++)
             {
-                x = UnityEngine.Random.Range(center.x + radius, mazeWidth - 1);
-            }
-            else if (x == -1 && randomDirections[i] == Directions.Left && center.x - radius >= 0)
-            {
-                x = UnityEngine.Random.Range(0, center.x - radius);
-            }
+                int distanceX = Mathf.Abs(x - center.x);
+                int distanceY = Mathf.Abs(y - center.y);
 
-            if (y == -1 && randomDirections[i] == Directions.Up && center.y + radius < mazeHeight)
-            {
-                y = UnityEngine.Random.Range(center.y + radius, mazeHeight - 1);
-            }
-            else if (y == -1 && randomDirections[i] == Directions.Down && center.y - radius >= 0)
-            {
-                y = UnityEngine.Random.Range(0, center.y - radius);
-            }
-
-            if (x != -1 && y != -1)
-            {
-                Vector2 pos = new Vector2(x * cellSize, y * cellSize);
-                return pos;
+                // Exclude cells within the square radius.
+                if (distanceX >= radius || distanceY >= radius)
+                {
+                    validCells.Add(new Vector2Int(x, y));
+                }
             }
         }
 
-        Debug.LogWarning("Couldn't find valid cell in given constraints. Returning random cell instead.");
-        return GetRandomCellPosInMaze();
+        if (validCells.Count == 0)
+        {
+            Debug.LogWarning("No valid cells found outside the specified radius.");
+            return GetRandomCellPosInMaze();
+        }
+
+        Vector2Int cell = validCells[UnityEngine.Random.Range(0, validCells.Count)];
+
+        return new Vector2(cell.x * cellSize, cell.y * cellSize);
     }
 }
 
